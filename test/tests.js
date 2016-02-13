@@ -2,6 +2,8 @@ import assert from "assert";
 import { introspectStarwars } from './introspectStarwars';
 import { initTemplateStringTransformer } from '../src/index';
 import RelayContext from 'react-relay/lib/RelayContext';
+import RelayNetworkLayer from 'react-relay/lib/RelayNetworkLayer';
+import starWarsNetworkLayer from './starWarsNetworkLayer';
 
 describe("graphql", () => {
   it("can introspect star wars", async () => {
@@ -35,5 +37,14 @@ describe("runtime query transformer", () => {
       }
     `);
 
+    const store = new RelayContext();
+    console.log(store._storeData);
+    store.forceFetch(transformed);
+
+    sleep(1000);
   });
 });
+
+function sleep(ms = 0) {
+  return new Promise(r => setTimeout(r, ms));
+}
