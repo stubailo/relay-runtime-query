@@ -1,24 +1,21 @@
 import assert from "assert";
 import { introspectStarwars } from './introspectStarwars';
 import { initTemplateStringTransformer } from '../src/index';
-import RelayContext from 'react-relay/lib/RelayContext';
-import RelayNetworkLayer from 'react-relay/lib/RelayNetworkLayer';
-import starWarsNetworkLayer from './starWarsNetworkLayer';
+import fs from 'fs';
+import path from 'path';
 
-describe("graphql", () => {
-  it("can introspect star wars", async () => {
-    const result = await introspectStarwars();
-
-    assert.ok(result.data);
-    assert.ok(result.data.__schema);
-  });
-});
-
-describe("relay context", () => {
-  it("can be imported and initialized", () => {
-    const store = new RelayContext();
-  });
-});
+// Uncomment the below to generate a new schema JSON
+// describe("graphql", () => {
+//   it("can introspect star wars", async () => {
+//     const result = await introspectStarwars();
+//
+//     fs.writeFileSync(path.join(__dirname, "starwars.json"),
+//       JSON.stringify(result, null, 2));
+//
+//     assert.ok(result.data);
+//     assert.ok(result.data.__schema);
+//   });
+// });
 
 describe("runtime query transformer", () => {
   it("can be initialized with an introspected query", async () => {
@@ -37,14 +34,6 @@ describe("runtime query transformer", () => {
       }
     `);
 
-    const store = new RelayContext();
-    console.log(store._storeData);
-    store.forceFetch(transformed);
-
-    sleep(1000);
+    console.log(transformed);
   });
 });
-
-function sleep(ms = 0) {
-  return new Promise(r => setTimeout(r, ms));
-}
