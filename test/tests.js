@@ -17,6 +17,14 @@ import path from 'path';
 //   });
 // });
 
+// Transform the query using the star wars schema
+async function transform(query) {
+  const result = await introspectStarwars();
+  const transformer = initTemplateStringTransformer(result.data);
+  const transformed = transformer(query);
+  return transformed;
+}
+
 describe("runtime query transformer", () => {
   it("can be initialized with an introspected query", async () => {
     const result = await introspectStarwars();
@@ -34,9 +42,7 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a simple query", async () => {
-    const result = await introspectStarwars();
-    const transformer = initTemplateStringTransformer(result.data);
-    const transformed = transformer(`
+    const transformed = await transform(`
       query HeroNameAndFriendsQuery {
         hero {
           id
@@ -64,9 +70,7 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a query with arguments", async () => {
-    const result = await introspectStarwars();
-    const transformer = initTemplateStringTransformer(result.data);
-    const transformed = transformer(`
+    const transformed = await transform(`
       query FetchLukeQuery {
         human(id: "1000") {
           name
@@ -86,9 +90,7 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a query with variables", async () => {
-    const result = await introspectStarwars();
-    const transformer = initTemplateStringTransformer(result.data);
-    const transformed = transformer(`
+    const transformed = await transform(`
       query FetchSomeIDQuery($someId: String!) {
         human(id: $someId) {
           name
@@ -108,9 +110,7 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a query fragment", async () => {
-    const result = await introspectStarwars();
-    const transformer = initTemplateStringTransformer(result.data);
-    const transformed = transformer(`
+    const transformed = await transform(`
       fragment HumanFragment on Human {
         name
         homePlanet
