@@ -5,7 +5,6 @@
   "main": "./lib/index.js",
   "jsnext:main": "./src/index.js",
   "scripts": {
-    "prepublish": "babel --optional runtime src/ --out-dir lib/",
     "test": "mocha --reporter spec --full-trace test/index.js"
   },
   "repository": {
@@ -28,16 +27,16 @@
   },
   "homepage": "https://github.com/benjamn/jsnext-skeleton#readme",
   "dependencies": {
-    "babel-runtime": "^5.8.25",
-    "babel-relay-plugin": "^0.6.3"
+    "babel-polyfill": "^6.5.0",
+    "babel-relay-plugin": "^0.7.0",
+    "babel-runtime": "5.8.35"
   },
   "devDependencies": {
-    "babel": "^5.8.23",
+    "babel-core": "6.3.21",
+    "babel-loader": "6.2.0",
+    "babel-plugin-transform-flow-strip-types": "^6.5.0",
+    "babel-preset-meteor": "^6.4.7",
     "graphql": "^0.4.17",
-    "mocha": "^2.3.3",
-    "react": "^0.14.7",
-    "react-dom": "^0.14.7",
-    "react-relay": "^0.7.0",
-    "relay": "^0.8.0"
+    "mocha": "^2.3.3"
   }
 }

@@ -23,6 +23,16 @@ describe("runtime query transformer", () => {
     const transformer = initTemplateStringTransformer(result.data);
   });
 
+  it("can compile a Relay.QL query", () => {
+    Relay.QL`
+      query HeroNameQuery {
+        hero {
+          name
+        }
+      }
+    `;
+  });
+
   it("can transform a simple query", async () => {
     const result = await introspectStarwars();
     const transformer = initTemplateStringTransformer(result.data);
@@ -34,6 +44,14 @@ describe("runtime query transformer", () => {
       }
     `);
 
-    console.log(transformed);
+    const expected = Relay.QL`
+      query HeroNameQuery {
+        hero {
+          name
+        }
+      }
+    `;
+
+    assert.deepEqual(transformed, expected);
   });
 });

@@ -1,7 +1,9 @@
 import RelayQLTransformer from 'babel-relay-plugin/lib/RelayQLTransformer';
 const {utilities_buildClientSchema: {buildClientSchema}} = require('babel-relay-plugin/lib/GraphQL');
 import invariant from 'babel-relay-plugin/lib/invariant';
+import RelayQLPrinter from 'babel-relay-plugin/lib/RelayQLPrinter';
 import { introspectionQuery } from 'graphql/utilities/introspectionQuery';
+import { transformFromAst } from 'babel-core';
 
 function getSchema(schemaProvider: GraphQLSchemaProvider): GraphQLSchema {
   const introspection = typeof schemaProvider === 'function' ?
@@ -31,10 +33,8 @@ function transform(schema, query) {
 //     const transformer = new RelayQLTransformer(schema, {});
 //
 //     function parseQueryString(queryString) {
-//       console.log("transforming", queryString);
 //       debugger;
 //       const processed = transformer.processDocumentText(queryString, 'queryName');
-//       console.log(processed);
 //       return processed;
 //     }
 //
@@ -42,13 +42,82 @@ function transform(schema, query) {
 //   });
 // }
 
+const t = {
+  arrayExpression(array) {
+    return array;
+  },
+  nullLiteral() {
+    return null;
+  },
+  valueToNode(value) {
+    return value;
+  },
+  objectExpression(propertyArray) {
+    const obj = {};
+
+    propertyArray.forEach((property) => {
+      if (property.value.__identifier) {
+        throw new Error("Don't support identifiers yet");
+      }
+
+      obj[property.key] = property.value;
+    });
+
+    return obj;
+  },
+  identifier(identifierName) {
+    return {
+      __identifier: identifierName
+    };
+  },
+  objectProperty(nameIdentifier, value) {
+    return {
+      key: nameIdentifier.__identifier,
+      value: value
+    };
+  },
+
+  // Only used once, to return a definition object in `print`
+  returnStatement(expressionToReturn) {
+    return {
+      __fakeReturnStatement: expressionToReturn
+    };
+  },
+
+  // Used twice - for runtime errors, and to return a definition object in `print`
+  blockStatement(arrayOfStatements) {
+    return {
+      __fakeBlockStatement: arrayOfStatements
+    };
+  },
+
+  functionExpression(name, substitutionIdentifiers, printedDocumentReturnBlockStatement) {
+    const query = printedDocumentReturnBlockStatement.__fakeBlockStatement[0].__fakeReturnStatement;
+
+    const querySubstitutionFunction = function () {
+      return query;
+    }
+
+    return querySubstitutionFunction;
+  },
+
+  callExpression(func, args) {
+    if (args && args.length > 0) { throw new Error("Args not implemented lol") }
+    // I don't know what this does lol, maybe it's an IIFE?
+    return func();
+  }
+};
+
 export function initTemplateStringTransformer(schemaJson) {
   const schema = getSchema(schemaJson);
   const transformer = new RelayQLTransformer(schema, {});
 
   function parseQueryString(queryString) {
-    const processed = transformer.processDocumentText(queryString, 'queryName');
-    return processed;
+    const definition = transformer.processDocumentText(queryString, 'queryName');
+    const options = {};
+    const Printer = RelayQLPrinter(t, options);
+    return new Printer('wtf??', {})
+      .print(definition, []);
   }
 
   return parseQueryString;
