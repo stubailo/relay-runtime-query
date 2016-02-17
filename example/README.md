@@ -1,6 +1,8 @@
-# Relay Starter Kit
+# Relay Starter Kit with Meteor
 
-This kit includes an app server, a GraphQL server, and a transpiler that you can use to get started building an app with Relay. For a walkthrough, see the [Relay tutorial](https://facebook.github.io/relay/docs/tutorial.html).
+This kit includes everything you need to get started building an app with Relay using the Meteor build tool. For a walkthrough, see the [Relay tutorial](https://facebook.github.io/relay/docs/tutorial.html).
+
+This version of the starter kit is built with the Meteor build tool, which applies a standard set of transformations to your client and server code.
 
 ## Installation
 
@@ -18,7 +20,7 @@ meteor
 
 ## Developing
 
-Any changes you make to the app will cause the app to automatically rebuild or refresh. Even if you change your GraphQL schema, you don't need to run any special scripts!
+Any changes you make to the app will cause the app to automatically rebuild or refresh. Even if you change your GraphQL schema, you don't need to run any special scripts thanks to the `relay-runtime-query` NPM package!
 
 ## License
 

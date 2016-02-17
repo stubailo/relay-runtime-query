@@ -35,6 +35,10 @@ graphQLFetcher(url, { query: introspectionQuery }).then(result => {
 });
 ```
 
+## Example
+
+Check out the [example app](https://github.com/meteor/relay-runtime-query/tree/master/example). It is built with the Meteor 1.3 beta build tool, and doesn't include the Relay babel plugin at all. You can easily change your server or client code at will, and the right parts of the app will rebuild. No need to run any build scripts manually after you change your schema.
+
 ## Why?
 
 It's annoying that you need a specific babel plugin to compile `Relay.QL` template strings at build time. Specifically, you need to:
@@ -54,5 +58,7 @@ With this package, you can avoid all of the drawbacks above by compiling your qu
 
 ## Caveats
 
-1. This should only be used in development, since it will no doubt slow down your application.
+At this stage, the package is more of a proof of concept, but I expect it will greatly help me with my exploration of Relay. Perhaps it will help you too, and perhaps you can help me improve the implementation!
+
+1. This should only be used in development and testing, since it will no doubt slow down your application. I'd suggest using the actual `babel-relay-plugin` when deploying a real app to production.
 2. Sane error handling has not yet been implemented. It should be pretty simple to add nice error support for schema validation, so you still get many of the benefits of pre-compiling your schema.
