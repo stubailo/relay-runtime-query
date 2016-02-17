@@ -3,7 +3,6 @@ const {utilities_buildClientSchema: {buildClientSchema}} = require('babel-relay-
 import invariant from 'babel-relay-plugin/lib/invariant';
 import RelayQLPrinter from 'babel-relay-plugin/lib/RelayQLPrinter';
 import { introspectionQuery } from 'graphql/utilities/introspectionQuery';
-import { transformFromAst } from 'babel-core';
 import Relay from 'react-relay';
 
 function getSchema(schemaProvider: GraphQLSchemaProvider): GraphQLSchema {
