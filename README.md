@@ -1,3 +1,3 @@
-# jsnext-skeleton [![Build Status](https://travis-ci.org/benjamn/jsnext-skeleton.svg?branch=master)](https://travis-ci.org/benjamn/jsnext-skeleton)
+# relay-runtime-query
 
-Skeleton project demonstrating best practices for authoring and publishing the latest version of JavaScript to NPM.
+Run Relay without transpiling all of your queries ahead of time.
