@@ -83,5 +83,27 @@ describe("runtime query transformer", () => {
     `;
 
     assert.deepEqual(transformed, expected);
-  })
+  });
+
+  it("can transform a query with variables", async () => {
+    const result = await introspectStarwars();
+    const transformer = initTemplateStringTransformer(result.data);
+    const transformed = transformer(`
+      query FetchSomeIDQuery($someId: String!) {
+        human(id: $someId) {
+          name
+        }
+      }
+    `);
+
+    const expected = Relay.QL`
+      query FetchSomeIDQuery($someId: String!) {
+        human(id: $someId) {
+          name
+        }
+      }
+    `;
+
+    assert.deepEqual(transformed, expected);
+  });
 });
