@@ -106,4 +106,24 @@ describe("runtime query transformer", () => {
 
     assert.deepEqual(transformed, expected);
   });
+
+  it("can transform a query fragment", async () => {
+    const result = await introspectStarwars();
+    const transformer = initTemplateStringTransformer(result.data);
+    const transformed = transformer(`
+      fragment HumanFragment on Human {
+        name
+        homePlanet
+      }
+    `);
+
+    const expected = Relay.QL`
+      fragment HumanFragment on Human {
+        name
+        homePlanet
+      }
+    `;
+
+    assert.deepEqual(transformed, expected);
+  });
 });
