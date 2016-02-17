@@ -18,6 +18,13 @@ function getSchema(schemaProvider: GraphQLSchemaProvider): GraphQLSchema {
   return buildClientSchema(introspection);
 }
 
+let fragmentIndex = 0;
+const fragmentCache = {};
+
+function encodeFragmentIndex(index) {
+  return '$$$' + index + '$$$';
+}
+
 function transform(schema, query) {
   const transformer = new RelayQLTransformer(schema, {});
   const processed = transformer.processDocumentText(query, 'queryName');
@@ -116,8 +123,19 @@ export function initTemplateStringTransformer(schemaJson) {
     const definition = transformer.processDocumentText(queryString, 'queryName');
     const options = {};
     const Printer = RelayQLPrinter(t, options);
-    return new Printer('wtf??', {})
+
+    const printed = new Printer('wtf??', {})
       .print(definition, []);
+    //
+    // // Generate a new index for this fragment
+    // fragmentIndex++;
+    // const thisQueryIndex = fragmentIndex;
+    //
+    // printed.toString = function () {
+    //   return encodeFragmentIndex(thisQueryIndex);
+    // }
+
+    return printed;
   }
 
   return parseQueryString;

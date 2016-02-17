@@ -4,6 +4,10 @@ import { initTemplateStringTransformer } from '../src/index';
 import fs from 'fs';
 import path from 'path';
 
+// Needed because some of the compiled stuff refers to Relay.QL.__frag
+import Relay from 'react-relay';
+
+
 // Uncomment the below to generate a new schema JSON
 // describe("graphql", () => {
 //   it("can introspect star wars", async () => {
@@ -17,15 +21,20 @@ import path from 'path';
 //   });
 // });
 
-// Transform the query using the star wars schema
-async function transform(query) {
-  const result = await introspectStarwars();
-  const transformer = initTemplateStringTransformer(result.data);
-  const transformed = transformer(query);
-  return transformed;
-}
 
-describe("runtime query transformer", () => {
+describe("runtime query transformer", async () => {
+  let transform;
+
+  before(async () => {
+    const result = await introspectStarwars();
+
+    transform = (stringArray, interpolations) => {
+      const transformer = initTemplateStringTransformer(result.data);
+      const transformed = transformer(stringArray[0]);
+      return transformed;
+    }
+  });
+
   it("can be initialized with an introspected query", async () => {
     const result = await introspectStarwars();
     const transformer = initTemplateStringTransformer(result.data);
@@ -42,7 +51,7 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a simple query", async () => {
-    const transformed = await transform(`
+    const transformed = transform`
       query HeroNameAndFriendsQuery {
         hero {
           id
@@ -52,7 +61,7 @@ describe("runtime query transformer", () => {
           }
         }
       }
-    `);
+    `;
 
     const expected = Relay.QL`
       query HeroNameAndFriendsQuery {
@@ -70,13 +79,13 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a query with arguments", async () => {
-    const transformed = await transform(`
+    const transformed = transform`
       query FetchLukeQuery {
         human(id: "1000") {
           name
         }
       }
-    `);
+    `;
 
     const expected = Relay.QL`
       query FetchLukeQuery {
@@ -90,13 +99,13 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a query with variables", async () => {
-    const transformed = await transform(`
+    const transformed = transform`
       query FetchSomeIDQuery($someId: String!) {
         human(id: $someId) {
           name
         }
       }
-    `);
+    `;
 
     const expected = Relay.QL`
       query FetchSomeIDQuery($someId: String!) {
@@ -110,12 +119,12 @@ describe("runtime query transformer", () => {
   });
 
   it("can transform a query fragment", async () => {
-    const transformed = await transform(`
+    const transformed = transform`
       fragment HumanFragment on Human {
         name
         homePlanet
       }
-    `);
+    `;
 
     const expected = Relay.QL`
       fragment HumanFragment on Human {
@@ -125,5 +134,43 @@ describe("runtime query transformer", () => {
     `;
 
     assert.deepEqual(transformed, expected);
+  });
+
+  it("can transform a query with fragment substitution", async () => {
+    // function getFragmentRuntime() {
+    //   return transform`
+    //     fragment on Human {
+    //       name
+    //       homePlanet
+    //     }
+    //   `;
+    // }
+    //
+    // const transformed = transform`
+    //   query FetchSomeIDQuery {
+    //     human(id: $someId) {
+    //       ${getFragmentRelayQL()}
+    //     }
+    //   }
+    // `;
+    //
+    // console.log(transformed);
+    //
+    // function getFragmentRelayQL() {
+    //   return Relay.QL`
+    //     fragment on Human {
+    //       name
+    //       homePlanet
+    //     }
+    //   `;
+    // }
+    //
+    // const expected = Relay.QL`
+    //   query FetchSomeIDQuery {
+    //     human(id: $someId) {
+    //       ${getFragmentRelayQL()}
+    //     }
+    //   }
+    // `;
   });
 });
