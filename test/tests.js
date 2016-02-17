@@ -150,27 +150,27 @@ describe("runtime query transformer", async () => {
       }
     `;
 
-    console.log(transformed);
+    function getFragmentRelayQL() {
+      return Relay.QL`
+        fragment on Human {
+          name
+          homePlanet
+        }
+      `;
+    }
 
-    // function f() {
-    //   function getFragmentRelayQL() {
-    //     return Relay.QL`
-    //       fragment on Human {
-    //         name
-    //         homePlanet
-    //       }
-    //     `;
-    //   }
-    //
-    //   const expected = Relay.QL`
-    //     query FetchSomeIDQuery {
-    //       human(id: $someId) {
-    //         ${getFragmentRelayQL()}
-    //       }
-    //     }
-    //   `;
-    // }
-    //
-    // console.log(f.toString());
+    const expected = Relay.QL`
+      query FetchSomeIDQuery {
+        human(id: $someId) {
+          ${getFragmentRelayQL()}
+        }
+      }
+    `;
+
+    // This name appears to be inconsequential, and is generated internally
+    // by the Relay plugin based on the current filename.
+    transformed.children[0].name = 'TestsRelayQL';
+
+    assert.deepEqual(transformed, expected);
   });
 });

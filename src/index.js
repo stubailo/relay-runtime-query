@@ -4,6 +4,7 @@ import invariant from 'babel-relay-plugin/lib/invariant';
 import RelayQLPrinter from 'babel-relay-plugin/lib/RelayQLPrinter';
 import { introspectionQuery } from 'graphql/utilities/introspectionQuery';
 import { transformFromAst } from 'babel-core';
+import Relay from 'react-relay';
 
 function getSchema(schemaProvider: GraphQLSchemaProvider): GraphQLSchema {
   const introspection = typeof schemaProvider === 'function' ?
@@ -85,9 +86,20 @@ const t = {
   },
 
   callExpression(func, args) {
+    // Try to hackily identify shallowFlatten
+    if (args && args.length === 2) {
+      return [].concat.apply([], args[1]);
+    }
+
     if (args && args.length > 0) { throw new Error("Args not implemented lol") }
-    // I don't know what this does lol, maybe it's an IIFE?
+
     return func();
+  },
+
+  memberExpression(members) {
+    return {
+      __fakeMemberExpression: members
+    };
   }
 };
 
@@ -95,7 +107,7 @@ export function initTemplateStringTransformer(schemaJson) {
   const schema = getSchema(schemaJson);
   const transformer = new RelayQLTransformer(schema, {});
 
-  function templateStringTag(quasis, expressions) {
+  function templateStringTag(quasis, ...expressions) {
     const processedTemplateLiteral = processTemplateLiteral(quasis, expressions, 'queryName');
     const processedTemplateText = transformer.processTemplateText(processedTemplateLiteral.templateText, 'queryName', 'propName');
     const definition = transformer.processDocumentText(processedTemplateText, 'queryName');
@@ -103,16 +115,10 @@ export function initTemplateStringTransformer(schemaJson) {
     const options = {};
     const Printer = RelayQLPrinter(t, options);
 
+    modifyPrinterClass(Printer);
+
     const printed = new Printer('wtf??', {})
       .print(definition, []);
-    //
-    // // Generate a new index for this fragment
-    // fragmentIndex++;
-    // const thisQueryIndex = fragmentIndex;
-    //
-    // printed.toString = function () {
-    //   return encodeFragmentIndex(thisQueryIndex);
-    // }
 
     return printed;
   }
@@ -135,6 +141,8 @@ function processTemplateLiteral(quasis, expressions, documentName) {
       const name = 'RQL_' + ii;
       const value = expressions[ii];
 
+      runtime.fragments[name] = value;
+
       substitutions.push({name, value});
 
       if (/:\s*$/.test(chunk)) {
@@ -154,4 +162,20 @@ function processTemplateLiteral(quasis, expressions, documentName) {
   });
 
   return {substitutions, templateText: chunks.join('').trim(), variableNames};
+}
+
+// Override certain functions on the printer
+function modifyPrinterClass(printer) {
+  printer.prototype.printFragmentReference = function (fragmentReference) {
+    return [].concat.apply([], [Relay.QL.__frag(runtime.getFragment(fragmentReference.getName()))]);
+  }
+}
+
+const runtime = {
+  fragments: {},
+  getFragment(name) {
+    const frag = this.fragments[name];
+    delete this.fragments[name];
+    return frag;
+  }
 }
