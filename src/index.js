@@ -179,11 +179,30 @@ const runtime = {
   }
 }
 
+// Eventually improve this to support old services like GraphiQL does.
 export function initTemplateStringTransformerFromUrl(url, callback) {
-  $.get(url, {
-    query: introspectionQuery
-  }, (data) => {
-    const schemaJson = data.data;
+  graphQLFetcher(url, { query: introspectionQuery }).then(result => {
+    const schemaJson = result.data;
     callback(initTemplateStringTransformer(schemaJson));
+  });
+}
+
+function graphQLFetcher(url, graphQLParams) {
+  return fetch(url, {
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(graphQLParams),
+    credentials: 'include',
+  }).then(function (response) {
+    return response.text();
+  }).then(function (responseBody) {
+    try {
+      return JSON.parse(responseBody);
+    } catch (error) {
+      return responseBody;
+    }
   });
 }
