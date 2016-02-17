@@ -41,20 +41,20 @@ Check out the [example app](https://github.com/meteor/relay-runtime-query/tree/m
 
 ## Why?
 
-It's annoying that you need a specific babel plugin to compile `Relay.QL` template strings at build time. Specifically, you need to:
+It can sometimes be inconvenient that you need a specific babel plugin to compile `Relay.QL` template strings at build time. Specifically, you need to:
 
 1. Compile your server
 2. Run the introspection query and save the result to a file
 3. Pass that result into a Babel 6 plugin to compile your client code
 4. Run your client
 
-This has several unfortunate consequences, in particular:
+This has several consequences, in particular:
 
 1. You absolutely need to use Babel 6
 2. You can't easily develop the client and server in parallel (if one person is working on both) because of the multitude of compilation steps above
 3. You can't play around with queries in the browser console since they won't be compiled so that Relay will understand them
 
-With this package, you can avoid all of the drawbacks above by compiling your queries at runtime.
+With this package, you can avoid all the drawbacks above when developing your app by compiling your queries at runtime.
 
 ## Caveats
 
