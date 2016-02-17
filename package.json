@@ -1,7 +1,7 @@
 {
-  "name": "jsnext-skeleton",
-  "version": "0.1.2",
-  "description": "Skeleton project demonstrating best practices for authoring and publishing the latest version of JavaScript to NPM.",
+  "name": "relay-runtime-query",
+  "version": "0.0.1",
+  "description": "Compile your Relay GraphQL queries at runtime, no need for Babel. Only for use in development.",
   "main": "./lib/index.js",
   "jsnext:main": "./src/index.js",
   "scripts": {
@@ -11,23 +11,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/benjamn/jsnext-skeleton.git"
+    "url": "meteor/relay-runtime-query"
   },
   "keywords": [
     "ecmascript",
     "es2015",
     "jsnext",
     "javascript",
-    "skeleton",
+    "relay",
     "npm",
-    "babel"
+    "react"
   ],
-  "author": "Ben Newman <ben@benjamn.com>",
+  "author": "Sashko Stubailo <sashko@stubailo.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/benjamn/jsnext-skeleton/issues"
-  },
-  "homepage": "https://github.com/benjamn/jsnext-skeleton#readme",
   "dependencies": {
     "babel-polyfill": "^6.5.0",
     "babel-relay-plugin": "^0.7.0",
