@@ -30,7 +30,8 @@
     "graphql": "^0.4.17",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "react-relay": "^0.7.0"
+    "react-relay": "^0.7.0",
+    "util": "^0.10.3"
   },
   "devDependencies": {
     "babel-core": "6.3.21",
