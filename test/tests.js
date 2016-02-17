@@ -62,4 +62,26 @@ describe("runtime query transformer", () => {
 
     assert.deepEqual(transformed, expected);
   });
+
+  it("can transform a query with arguments", async () => {
+    const result = await introspectStarwars();
+    const transformer = initTemplateStringTransformer(result.data);
+    const transformed = transformer(`
+      query FetchLukeQuery {
+        human(id: "1000") {
+          name
+        }
+      }
+    `);
+
+    const expected = Relay.QL`
+      query FetchLukeQuery {
+        human(id: "1000") {
+          name
+        }
+      }
+    `;
+
+    assert.deepEqual(transformed, expected);
+  })
 });
