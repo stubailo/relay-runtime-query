@@ -179,3 +179,12 @@ const runtime = {
     return frag;
   }
 }
+
+export function initTemplateStringTransformerFromUrl(url, callback) {
+  $.get(url, {
+    query: introspectionQuery
+  }, (data) => {
+    const schemaJson = data.data;
+    callback(initTemplateStringTransformer(schemaJson));
+  });
+}
