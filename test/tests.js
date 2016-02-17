@@ -173,4 +173,20 @@ describe("runtime query transformer", async () => {
 
     assert.deepEqual(transformed, expected);
   });
+
+  it("can transform a mutation", async () => {
+    const transformed = transform`
+      mutation { createComment }
+    `;
+
+    const expected = Relay.QL`
+      mutation { createComment }
+    `;
+
+    // This name appears to be inconsequential, and is generated internally
+    // by the Relay plugin based on the current filename.
+    transformed.name = 'Tests';
+
+    assert.deepEqual(transformed, expected);
+  });
 });

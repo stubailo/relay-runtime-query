@@ -37,6 +37,7 @@
     "babel-plugin-transform-flow-strip-types": "^6.5.0",
     "babel-preset-meteor": "^6.4.7",
     "graphql": "^0.4.17",
+    "graphql-relay": "^0.3.6",
     "mocha": "^2.3.3",
     "react-relay": "^0.7.0"
   }

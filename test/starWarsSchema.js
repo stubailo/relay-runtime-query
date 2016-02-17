@@ -267,10 +267,68 @@ const queryType = new GraphQLObjectType({
   })
 });
 
+// NOT FROM STAR WARS - FOR TESTING MUTATIONS
+import {
+  GraphQLID,
+} from 'graphql';
+
+import {
+  mutationWithClientMutationId,
+} from 'graphql-relay';
+
+const STORY = {
+  comments: [],
+  id: '42',
+};
+
+var CommentType = new GraphQLObjectType({
+  name: 'Comment',
+  fields: () => ({
+    id: {type: GraphQLID},
+    text: {type: GraphQLString},
+  }),
+});
+
+var StoryType = new GraphQLObjectType({
+  name: 'Story',
+  fields: () => ({
+    comments: { type: new GraphQLList(CommentType) },
+    id: { type: GraphQLString },
+  }),
+});
+
+var CreateCommentMutation = mutationWithClientMutationId({
+  name: 'CreateComment',
+  inputFields: {
+    text: { type: new GraphQLNonNull(GraphQLString) },
+  },
+  outputFields: {
+    story: {
+      type: StoryType,
+      resolve: () => STORY,
+    },
+  },
+  mutateAndGetPayload: ({text}) => {
+    var newComment = {
+      id: STORY.comments.length,
+      text,
+    };
+    STORY.comments.push(newComment);
+    return newComment;
+  },
+});
+
+
 /**
  * Finally, we construct our schema (whose starting query type is the query
  * type we defined above) and export it.
  */
 export const StarWarsSchema = new GraphQLSchema({
-  query: queryType
+  query: queryType,
+  mutation: new GraphQLObjectType({
+    name: 'Mutation',
+    fields: () => ({
+      createComment: CreateCommentMutation,
+    }),
+  }),
 });
