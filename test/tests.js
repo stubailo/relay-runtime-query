@@ -28,11 +28,7 @@ describe("runtime query transformer", async () => {
   before(async () => {
     const result = await introspectStarwars();
 
-    transform = (stringArray, interpolations) => {
-      const transformer = initTemplateStringTransformer(result.data);
-      const transformed = transformer(stringArray[0]);
-      return transformed;
-    }
+    transform = initTemplateStringTransformer(result.data);
   });
 
   it("can be initialized with an introspected query", async () => {
@@ -137,40 +133,44 @@ describe("runtime query transformer", async () => {
   });
 
   it("can transform a query with fragment substitution", async () => {
-    // function getFragmentRuntime() {
-    //   return transform`
-    //     fragment on Human {
-    //       name
-    //       homePlanet
+    function getFragmentRuntime() {
+      return transform`
+        fragment on Human {
+          name
+          homePlanet
+        }
+      `;
+    }
+
+    const transformed = transform`
+      query FetchSomeIDQuery {
+        human(id: $someId) {
+          ${getFragmentRuntime()}
+        }
+      }
+    `;
+
+    console.log(transformed);
+
+    // function f() {
+    //   function getFragmentRelayQL() {
+    //     return Relay.QL`
+    //       fragment on Human {
+    //         name
+    //         homePlanet
+    //       }
+    //     `;
+    //   }
+    //
+    //   const expected = Relay.QL`
+    //     query FetchSomeIDQuery {
+    //       human(id: $someId) {
+    //         ${getFragmentRelayQL()}
+    //       }
     //     }
     //   `;
     // }
     //
-    // const transformed = transform`
-    //   query FetchSomeIDQuery {
-    //     human(id: $someId) {
-    //       ${getFragmentRelayQL()}
-    //     }
-    //   }
-    // `;
-    //
-    // console.log(transformed);
-    //
-    // function getFragmentRelayQL() {
-    //   return Relay.QL`
-    //     fragment on Human {
-    //       name
-    //       homePlanet
-    //     }
-    //   `;
-    // }
-    //
-    // const expected = Relay.QL`
-    //   query FetchSomeIDQuery {
-    //     human(id: $someId) {
-    //       ${getFragmentRelayQL()}
-    //     }
-    //   }
-    // `;
+    // console.log(f.toString());
   });
 });

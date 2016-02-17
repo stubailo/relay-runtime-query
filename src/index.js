@@ -25,30 +25,6 @@ function encodeFragmentIndex(index) {
   return '$$$' + index + '$$$';
 }
 
-function transform(schema, query) {
-  const transformer = new RelayQLTransformer(schema, {});
-  const processed = transformer.processDocumentText(query, 'queryName');
-  return processed;
-}
-
-// export function initTemplateStringTransformerFromUrl(url, callback) {
-//   $.get(url, {
-//     query: introspectionQuery
-//   }, (data) => {
-//     const schemaJson = data.data;
-//     const schema = getSchema(schemaJson);
-//     const transformer = new RelayQLTransformer(schema, {});
-//
-//     function parseQueryString(queryString) {
-//       debugger;
-//       const processed = transformer.processDocumentText(queryString, 'queryName');
-//       return processed;
-//     }
-//
-//     callback(parseQueryString);
-//   });
-// }
-
 const t = {
   arrayExpression(array) {
     return array;
@@ -119,8 +95,11 @@ export function initTemplateStringTransformer(schemaJson) {
   const schema = getSchema(schemaJson);
   const transformer = new RelayQLTransformer(schema, {});
 
-  function parseQueryString(queryString) {
-    const definition = transformer.processDocumentText(queryString, 'queryName');
+  function templateStringTag(quasis, expressions) {
+    const processedTemplateLiteral = processTemplateLiteral(quasis, expressions, 'queryName');
+    const processedTemplateText = transformer.processTemplateText(processedTemplateLiteral.templateText, 'queryName', 'propName');
+    const definition = transformer.processDocumentText(processedTemplateText, 'queryName');
+
     const options = {};
     const Printer = RelayQLPrinter(t, options);
 
@@ -138,5 +117,41 @@ export function initTemplateStringTransformer(schemaJson) {
     return printed;
   }
 
-  return parseQueryString;
+  return templateStringTag;
+}
+
+// Attempted lift from https://github.com/facebook/relay/blob/0be965c3c92c48499b452e953d823837838df962/scripts/babel-relay-plugin/src/RelayQLTransformer.js#L114-L148
+// Returns { substitutions, templateText, variableNames }
+// Who knows why they are called quasis??
+function processTemplateLiteral(quasis, expressions, documentName) {
+  const chunks = [];
+  const variableNames = {};
+  const substitutions = [];
+
+  quasis.forEach((chunk, ii) => {
+    chunks.push(chunk);
+
+    if (ii !== quasis.length - 1) {
+      const name = 'RQL_' + ii;
+      const value = expressions[ii];
+
+      substitutions.push({name, value});
+
+      if (/:\s*$/.test(chunk)) {
+        invariant(
+          false, // this.options.substituteVariables,
+          'You supplied a GraphQL document named `%s` that uses template ' +
+          'substitution for an argument value, but variable substitution ' +
+          'has not been enabled.',
+          documentName
+        );
+        chunks.push('$' + name);
+        variableNames[name] = undefined;
+      } else {
+        chunks.push('...' + name);
+      }
+    }
+  });
+
+  return {substitutions, templateText: chunks.join('').trim(), variableNames};
 }
