@@ -37,17 +37,25 @@ describe("runtime query transformer", () => {
     const result = await introspectStarwars();
     const transformer = initTemplateStringTransformer(result.data);
     const transformed = transformer(`
-      query HeroNameQuery {
+      query HeroNameAndFriendsQuery {
         hero {
+          id
           name
+          friends {
+            name
+          }
         }
       }
     `);
 
     const expected = Relay.QL`
-      query HeroNameQuery {
+      query HeroNameAndFriendsQuery {
         hero {
+          id
           name
+          friends {
+            name
+          }
         }
       }
     `;
