@@ -37,6 +37,8 @@ graphQLFetcher(url, { query: introspectionQuery }).then(result => {
 });
 ```
 
+Note that this depends on a new ES2015 feature called [tagged template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_template_literals). This allows the transformer function to operate on a Relay GraphQL query and be aware of the interpolated variables and fragments.
+
 ## Example
 
 Check out the [example app](https://github.com/meteor/relay-runtime-query/tree/master/example). It is built with the Meteor 1.3 beta build tool, and doesn't include the Relay babel plugin at all. You can easily change your server or client code at will, and the right parts of the app will rebuild. No need to run any build scripts manually after you change your schema.
