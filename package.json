@@ -42,6 +42,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "graphql": "^0.4.17",
     "graphql-relay": "^0.3.6",
+    "lodash": "^4.5.1",
     "mocha": "^2.3.3"
   }
 }

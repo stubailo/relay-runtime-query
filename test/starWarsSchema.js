@@ -249,6 +249,47 @@ var {nodeInterface, nodeField} = nodeDefinitions(
 );
 
 /**
+ * We define our basic ship type.
+ *
+ * This implements the following type system shorthand:
+ *   type Ship : Node {
+ *     id: String!
+ *     name: String
+ *   }
+ */
+var shipType = new GraphQLObjectType({
+  name: 'Ship',
+  description: 'A ship in the Star Wars saga',
+  fields: () => ({
+    id: globalIdField('Ship'),
+    name: {
+      type: GraphQLString,
+      description: 'The name of the ship.',
+    },
+  }),
+  interfaces: [nodeInterface],
+});
+
+/**
+ * We define a connection between a faction and its ships.
+ *
+ * connectionType implements the following type system shorthand:
+ *   type ShipConnection {
+ *     edges: [ShipEdge]
+ *     pageInfo: PageInfo!
+ *   }
+ *
+ * connectionType has an edges field - a list of edgeTypes that implement the
+ * following type system shorthand:
+ *   type ShipEdge {
+ *     cursor: String!
+ *     node: Ship
+ *   }
+ */
+var {connectionType: shipConnection} =
+  connectionDefinitions({name: 'Ship', nodeType: shipType});
+
+/**
  * We define our faction type, which implements the node interface.
  *
  * This implements the following type system shorthand:
@@ -266,7 +307,16 @@ var factionType = new GraphQLObjectType({
     name: {
       type: GraphQLString,
       description: 'The name of the faction.',
-    }
+    },
+    ships: {
+      type: shipConnection,
+      description: 'The ships used by the faction.',
+      args: connectionArgs,
+      resolve: (faction, args) => connectionFromArray(
+        faction.ships.map((id) => getShip(id)),
+        args
+      ),
+    },
   }),
   interfaces: [nodeInterface],
 });

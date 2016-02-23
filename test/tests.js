@@ -3,6 +3,7 @@ import { introspectStarwars } from './introspectStarwars';
 import { initTemplateStringTransformer } from '../src/index';
 import fs from 'fs';
 import path from 'path';
+import _ from 'lodash';
 
 // Needed because some of the compiled stuff refers to Relay.QL.__frag
 import Relay from 'react-relay';
@@ -129,11 +130,7 @@ describe("runtime query transformer", async () => {
       }
     `;
 
-    // This ID depends on the contents of the entire test file, and it's not worth it to make
-    // them actually match up
-    transformed.id = expected.id;
-
-    assert.deepEqual(transformed, expected);
+    assertEqualSansNameAndId(transformed, expected);
   });
 
   it("can transform a query with fragment substitution", async () => {
@@ -171,15 +168,7 @@ describe("runtime query transformer", async () => {
       }
     `;
 
-    // This name appears to be inconsequential, and is generated internally
-    // by the Relay plugin based on the current filename.
-    transformed.children[0].name = 'TestsRelayQL';
-
-    // This ID depends on the contents of the entire test file, and it's not worth it to make
-    // them actually match up
-    transformed.children[0].id = expected.children[0].id;
-
-    assert.deepEqual(transformed, expected);
+    assertEqualSansNameAndId(transformed, expected);
   });
 
   it("can transform a mutation", async () => {
@@ -191,11 +180,7 @@ describe("runtime query transformer", async () => {
       mutation { createComment }
     `;
 
-    // This name appears to be inconsequential, and is generated internally
-    // by the Relay plugin based on the current filename.
-    transformed.name = 'Tests';
-
-    assert.deepEqual(transformed, expected);
+    assertEqualSansNameAndId(transformed, expected);
   });
 
   it("can transform a query from star wars example with an array argument", () => {
@@ -211,12 +196,31 @@ describe("runtime query transformer", async () => {
       }
     `;
 
-    transformed.name = 'Tests';
-
-    assert.deepEqual(transformed, expected);
+    assertEqualSansNameAndId(transformed, expected);
   });
 
   it("can transform a query with a Relay annotation from the star wars example", () => {
+    function getTransformedFragment() {
+      return transform`
+        fragment on Ship {
+          name
+        }
+      `;
+    }
+
+    const transformed = transform`
+      fragment on Faction @relay(plural: true) {
+        name,
+        ships(first: 10) {
+          edges {
+            node {
+              ${getTransformedFragment()}
+            }
+          }
+        }
+      }
+    `;
+
     function getRelayQLFragment() {
       return Relay.QL`
         fragment on Ship {
@@ -238,6 +242,25 @@ describe("runtime query transformer", async () => {
       }
     `;
 
-    console.log("expected", JSON.stringify(expected, null, 2));
+    assertEqualSansNameAndId(transformed, expected);
   });
 });
+
+function assertEqualSansNameAndId(a, b) {
+  const filteredA = omitNameAndIdFields(a);
+  const filteredB = omitNameAndIdFields(b);
+
+  assert.deepEqual(filteredA, filteredB);
+}
+
+function omitNameAndIdFields(obj) {
+  if (! _.isObject(obj)) {
+    return obj;
+  }
+
+  const omitted = _.omit(obj, ['id', 'name']);
+
+  return _.mapValues(omitted, (value) => {
+    return omitNameAndIdFields(value);
+  });
+}
