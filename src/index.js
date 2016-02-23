@@ -4,6 +4,7 @@ import invariant from 'babel-relay-plugin/lib/invariant';
 import RelayQLPrinter from 'babel-relay-plugin/lib/RelayQLPrinter';
 import { introspectionQuery } from 'graphql/utilities/introspectionQuery';
 import Relay from 'react-relay';
+import generateHash from 'babel-relay-plugin/lib/generateHash';
 
 function getSchema(schemaProvider: GraphQLSchemaProvider): GraphQLSchema {
   const introspection = typeof schemaProvider === 'function' ?
@@ -108,8 +109,17 @@ export function initTemplateStringTransformer(schemaJson) {
 
   function templateStringTag(quasis, ...expressions) {
     const processedTemplateLiteral = processTemplateLiteral(quasis, expressions, 'queryName');
-    const processedTemplateText = transformer.processTemplateText(processedTemplateLiteral.templateText, 'queryName', 'propName');
-    const definition = transformer.processDocumentText(processedTemplateText, 'queryName');
+
+    const processedTemplateText = transformer.processTemplateText(processedTemplateLiteral.templateText, {
+      documentName: 'queryName',
+      propName: 'propName'
+    });
+
+    const definition = transformer.processDocumentText(processedTemplateText, {
+      documentName: 'queryName',
+      propName: 'propName',
+      fragmentLocationID: generateHash(JSON.stringify(processedTemplateText)).substring(0, 12)
+    });
 
     const options = {};
     const Printer = RelayQLPrinter(t, options);

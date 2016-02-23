@@ -129,6 +129,10 @@ describe("runtime query transformer", async () => {
       }
     `;
 
+    // This ID depends on the contents of the entire test file, and it's not worth it to make
+    // them actually match up
+    transformed.id = expected.id;
+
     assert.deepEqual(transformed, expected);
   });
 
@@ -170,6 +174,10 @@ describe("runtime query transformer", async () => {
     // This name appears to be inconsequential, and is generated internally
     // by the Relay plugin based on the current filename.
     transformed.children[0].name = 'TestsRelayQL';
+
+    // This ID depends on the contents of the entire test file, and it's not worth it to make
+    // them actually match up
+    transformed.children[0].id = expected.children[0].id;
 
     assert.deepEqual(transformed, expected);
   });
