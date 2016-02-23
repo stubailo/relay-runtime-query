@@ -6,6 +6,8 @@ Run Relay without transpiling all of your queries ahead of time.
 npm install relay-runtime-query
 ```
 
+Currently works with **Relay 0.7.1**.
+
 ## Usage
 
 Initialize a template string transformer function from a GraphQL server URL. In the callback, you will have a function that can transform arbitrary GraphQL queries according to your server schema.
