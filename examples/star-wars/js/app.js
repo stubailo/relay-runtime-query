@@ -19,7 +19,11 @@ import StarWarsAppHomeRoute from './routes/StarWarsAppHomeRoute';
 import { initTemplateStringTransformerFromUrl } from 'relay-runtime-query'
 
 initTemplateStringTransformerFromUrl('/graphql', (func) => {
+  const oldRelayQL = Relay.QL;
+
   Relay.QL = func;
+  Relay.QL.__frag = oldRelayQL.__frag;
+  Relay.QL.__var = oldRelayQL.__var;
 
   ReactDOM.render(
     <Relay.RootContainer

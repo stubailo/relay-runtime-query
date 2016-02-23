@@ -9,17 +9,17 @@ import Relay from 'react-relay';
 
 
 // Uncomment the below to generate a new schema JSON
-// describe("graphql", () => {
-//   it("can introspect star wars", async () => {
-//     const result = await introspectStarwars();
-//
-//     fs.writeFileSync(path.join(__dirname, "starwars.json"),
-//       JSON.stringify(result, null, 2));
-//
-//     assert.ok(result.data);
-//     assert.ok(result.data.__schema);
-//   });
-// });
+describe("graphql", () => {
+  it("can introspect star wars", async () => {
+    const result = await introspectStarwars();
+
+    fs.writeFileSync(path.join(__dirname, "starwars.json"),
+      JSON.stringify(result, null, 2));
+
+    assert.ok(result.data);
+    assert.ok(result.data.__schema);
+  });
+});
 
 
 describe("runtime query transformer", async () => {
@@ -196,5 +196,48 @@ describe("runtime query transformer", async () => {
     transformed.name = 'Tests';
 
     assert.deepEqual(transformed, expected);
+  });
+
+  it("can transform a query from star wars example with an array argument", () => {
+    const transformed = transform`
+      query {
+        factions(names: $factionNames)
+      }
+    `;
+
+    const expected = Relay.QL`
+      query {
+        factions(names: $factionNames)
+      }
+    `;
+
+    transformed.name = 'Tests';
+
+    assert.deepEqual(transformed, expected);
+  });
+
+  it("can transform a query with a Relay annotation from the star wars example", () => {
+    function getRelayQLFragment() {
+      return Relay.QL`
+        fragment on Ship {
+          name
+        }
+      `;
+    }
+
+    const expected = Relay.QL`
+      fragment on Faction @relay(plural: true) {
+        name,
+        ships(first: 10) {
+          edges {
+            node {
+              ${getRelayQLFragment()}
+            }
+          }
+        }
+      }
+    `;
+
+    console.log("expected", JSON.stringify(expected, null, 2));
   });
 });

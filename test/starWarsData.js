@@ -122,3 +122,28 @@ export function getHuman(id) {
 export function getDroid(id) {
   return droidData[id];
 }
+
+// FROM RELAY EXAMPLE APP
+var rebels = {
+  id: '1',
+  name: 'Alliance to Restore the Republic',
+  ships: ['1', '2', '3', '4', '5'],
+};
+
+var empire = {
+  id: '2',
+  name: 'Galactic Empire',
+  ships: ['6', '7', '8'],
+};
+
+export function getFactions(names) {
+  return names.map(name => {
+    if (name === 'empire') {
+      return empire;
+    }
+    if (name === 'rebels') {
+      return rebels;
+    }
+    return null;
+  });
+}

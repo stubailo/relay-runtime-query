@@ -21,6 +21,16 @@ import {
 
 import { getFriends, getHero, getHuman, getDroid } from './starWarsData.js';
 
+import {
+  connectionArgs,
+  connectionDefinitions,
+  connectionFromArray,
+  fromGlobalId,
+  globalIdField,
+  mutationWithClientMutationId,
+  nodeDefinitions,
+} from 'graphql-relay';
+
 /**
  * This is designed to be an end-to-end test, demonstrating
  * the full GraphQL stack.
@@ -217,6 +227,51 @@ const droidType = new GraphQLObjectType({
 });
 
 /**
+ * We get the node interface and field from the Relay library.
+ *
+ * The first method defines the way we resolve an ID to its object.
+ * The second defines the way we resolve a node object to its GraphQL type.
+ */
+var {nodeInterface, nodeField} = nodeDefinitions(
+  (globalId) => {
+    var {type, id} = fromGlobalId(globalId);
+    if (type === 'Faction') {
+      return getFaction(id);
+    } else if (type === 'Ship') {
+      return getShip(id);
+    } else {
+      return null;
+    }
+  },
+  (obj) => {
+    return obj.ships ? factionType : shipType;
+  }
+);
+
+/**
+ * We define our faction type, which implements the node interface.
+ *
+ * This implements the following type system shorthand:
+ *   type Faction : Node {
+ *     id: String!
+ *     name: String
+ *     ships: ShipConnection
+ *   }
+ */
+var factionType = new GraphQLObjectType({
+  name: 'Faction',
+  description: 'A faction in the Star Wars saga',
+  fields: () => ({
+    id: globalIdField('Faction'),
+    name: {
+      type: GraphQLString,
+      description: 'The name of the faction.',
+    }
+  }),
+  interfaces: [nodeInterface],
+});
+
+/**
  * This is the type that will be the root of our query, and the
  * entry point into our schema. It gives us the ability to fetch
  * objects by their IDs, as well as to fetch the undisputed hero
@@ -264,6 +319,15 @@ const queryType = new GraphQLObjectType({
       },
       resolve: (root, { id }) => getDroid(id),
     },
+    factions: {
+      type: new GraphQLList(factionType),
+      args: {
+        names: {
+          type: new GraphQLList(GraphQLString),
+        },
+      },
+      resolve: (root, {names}) => getFactions(names),
+    },
   })
 });
 
@@ -271,10 +335,6 @@ const queryType = new GraphQLObjectType({
 import {
   GraphQLID,
 } from 'graphql';
-
-import {
-  mutationWithClientMutationId,
-} from 'graphql-relay';
 
 const STORY = {
   comments: [],
